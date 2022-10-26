@@ -20,27 +20,50 @@ const getPageContent = (uri) => {
 };
 
 getPageContent(`${URL}/car/carList.html?cho=1`).then(($) => {
-  console.log(html2Data($));
+  html2DataDJAuto($);
 });
 
-const html2Data = ($) => {
+const html2DataDJAuto = ($) => {
   const data = [];
   $(".car_list tbody").each((_, c) => {
-    const $c = $(c);
-    const $tr = $c.find("tr");
+    const $tr = $(c).find("tr");
     const $td = $tr.find("td");
-    const $img = $td.find("img");
-    const $a = $td.find(".money b:first-child");
-    const $span = $td.find("span");
+    const $price = $td.find(".money b:first-child");
+    const $link = $td.find(".left a.subject");
+    const $car_name = $td.find(".left a.subject b");
+    const $image = $td.find(".photo a");
+    const $model_year = $tr.find("td.year");
 
-    const car = {
-      image: $img.attr("src"),
-      title: $a.text(),
-      price: $span.text(),
-    };
+    $price.each((_, c) => {
+      const price = $(c).text().replace(/,/g, "");
+      data.push({
+        price: parseInt(price),
+      });
+    });
 
-    data.push(car);
+    $link.each((_, c) => {
+      const link = $(c).attr("href");
+      data[_].link = `https://www.djauto.co.kr${link}`;
+      data[_].scar_code = link.split("/")[2];
+    });
+
+    $image.each((_, c) => {
+      const image = $(c).find("img").attr("src");
+      data[_].image_url = `https://www.djauto.co.kr${image}`;
+    });
+
+    $model_year.each((_, c) => {
+      const model_year = $(c).text().trim();
+      data[_].model_year = model_year;
+    });
+
+    $car_name.each((_, c) => {
+      const car_name = $(c).text().trim();
+      data[_].car_name = car_name;
+    });
   });
+
+  console.log(data[0]);
 
   return data;
 };
