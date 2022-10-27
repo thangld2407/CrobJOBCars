@@ -18,7 +18,7 @@ const scraperObject = {
         .split("=")[1];
     });
 
-    for (let i = 1; i <= totalPage; i++) {
+    for (let i = 1; i <= 2; i++) {
       let page = await browser.newPage();
       console.log(`Navigating to ${this.url}?cho=1&page=${i}...`);
       // Navigate to the selected page
