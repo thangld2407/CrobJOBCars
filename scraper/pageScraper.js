@@ -49,7 +49,7 @@ const scraperObject = {
             let imageList = [];
             image.forEach((item) => {
               let new_url;
-              let url = new URL(item.querySelector("a img").src);
+              let url = item.querySelector("a img") && new URL( item.querySelector("a img").src) || "";
               if (url.search !== "") {
                 new_url = url.search.split("=")[1];
               } else {
