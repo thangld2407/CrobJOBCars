@@ -1,0 +1,73 @@
+[
+  {
+    "basic_infor": {
+      "list_image": [
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931533_0.jpg",
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931535_1.jpg",
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931537_2.jpg",
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931553_3.jpg",
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931545_4.jpg",
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931550_5.jpg",
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931566_6.jpg",
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931564_7.jpg",
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931573_8.jpg",
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931576_9.jpg",
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931578_10.jpg",
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931580_11.jpg",
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931588_12.jpg",
+        "http://aw.djauto.co.kr/data/bj1889/20221028/1666931594_13.jpg",
+        "https://www.djauto.co.kr/images/nophoto/carnophoto_90x66.gif",
+        "https://www.djauto.co.kr/images/nophoto/carnophoto_90x66.gif",
+        "https://www.djauto.co.kr/images/nophoto/carnophoto_90x66.gif",
+        "https://www.djauto.co.kr/images/nophoto/carnophoto_90x66.gif",
+        "https://www.djauto.co.kr/images/nophoto/carnophoto_90x66.gif",
+        "https://www.djauto.co.kr/images/nophoto/carnophoto_90x66.gif",
+        "https://www.djauto.co.kr/images/nophoto/carnophoto_90x66.gif"
+      ],
+      "car_name": "현대 포터II CRDi 더블캡 초장축 골드",
+      "price": "690 만원",
+      "car_code": "345129",
+      "license_plate": "87고XXXX",
+      "year_manufacture": "2014",
+      "distance_driven": "215,994km",
+      "fuel_type": "경유",
+      "gearbox": "수동",
+      "cylinder_capacity": "수동",
+      "color": "흰색",
+      "car_type": "화물차",
+      "seizure": "없음",
+      "mortgage": "없음",
+      "presentation_number": "202210241013169",
+      "storage_location": "화물 08"
+    },
+    "seller": {
+      "phone_contact": "010-5409-1889",
+      "seller_name": "송용운",
+      "employee_number": "DA22-00110",
+      "affiliated_company": "(주)백제자동차",
+      "business_address": "대전 유성구 유성대로 510 (복용동, 복용동자동차매매센타) 327호",
+      "parking_location": ""
+    },
+    "vehicle_detail": {
+      "exterior": [
+        "전동식 사이드미러",
+        "알류미늄휠"
+      ],
+      "guts": [
+        "가죽시트",
+        "열선시트(앞)",
+        "하이패스 룸미러",
+        "열선핸들"
+      ],
+      "safety": [
+        "ABS",
+        "운전석에어백"
+      ],
+      "convenience": [
+        "에어컨",
+        "무선도어잠금"
+      ]
+    },
+    "performance_check": "https://www.djauto.co.kr/car/carViewFrameUsedCarCheck.html?checkFlag=428837"
+  }
+]
