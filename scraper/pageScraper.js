@@ -19,7 +19,7 @@ const scraperObject = {
         .split("=")[1];
     });
 
-    for (let i = 1; i <= 1; i++) {
+    for (let i = 1; i <= totalPage; i++) {
       let page = await browser.newPage();
       console.log(`Navigating to ${this.url}?cho=1&page=${i}...`);
 
