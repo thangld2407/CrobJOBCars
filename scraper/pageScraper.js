@@ -5,6 +5,7 @@ const scraperObject = {
   url: "https://www.djauto.co.kr/car/carList.html",
   async scraper(browser) {
     let dataFile = [];
+    let category;
     let pageTemp = await browser.newPage();
     await pageTemp.goto(this.url);
     await pageTemp.waitForSelector(".car_list tbody");
@@ -18,7 +19,7 @@ const scraperObject = {
         .split("=")[1];
     });
 
-    for (let i = 1; i <= totalPage; i++) {
+    for (let i = 1; i <= 1; i++) {
       let page = await browser.newPage();
       console.log(`Navigating to ${this.url}?cho=1&page=${i}...`);
 
@@ -30,6 +31,14 @@ const scraperObject = {
         let data = [];
         document.querySelectorAll("td a.subject").forEach((item, index) => {
           data.push(item.getAttribute("href"));
+        });
+        return data;
+      });
+
+      let listTypeCar = await page.evaluate(() => {
+        let data = [];
+        document.querySelectorAll("td a.subject").forEach((item, index) => {
+          data.push(item.textContent.trim().split("[")[1].split("]")[0].trim());
         });
         return data;
       });
@@ -49,7 +58,10 @@ const scraperObject = {
             let imageList = [];
             image.forEach((item) => {
               let new_url;
-              let url = item.querySelector("a img") && new URL( item.querySelector("a img").src) || "";
+              let url =
+                (item.querySelector("a img") &&
+                  new URL(item.querySelector("a img").src)) ||
+                "";
               if (url.search !== "") {
                 new_url = url.search.split("=")[1];
               } else {
@@ -250,14 +262,33 @@ const scraperObject = {
           }
         }
       }
+      category = listTypeCar.filter((item, index) => {
+        return listTypeCar.indexOf(item) === index;
+      });
+
+      for (let i = 0; i < category.length; i++) {
+        const axios = require("axios");
+        try {
+          await axios.post(`${process.env.BASE_URL}/api/cars/save-type`, {
+            car_type_name: category[i],
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
       await page.close();
     }
+    fs.writeFileSync("type.json", JSON.stringify(category));
 
     fs.writeFileSync("data.json", JSON.stringify(dataFile));
 
     console.log("Done crawling");
 
+    // Remove duplicate item in array
+
     await pageTemp.close();
+    await browser.close();
   },
 };
 

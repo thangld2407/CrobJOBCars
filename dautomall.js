@@ -3,7 +3,7 @@ const cron = require("node-cron");
 
 function CrawlData() {
   const browserObject = require("./browser");
-  const scraperController = require("./controller/pageController");
+  const scraperController = require("./controller/dautoController");
 
   //Start the browser and create a browser instance
   let browserInstance = browserObject.startBrowser();
@@ -14,6 +14,6 @@ function CrawlData() {
 
 CrawlData();
 
-cron.schedule("0 */8 * * *", async () => {
-  CrawlData();
-});
+// cron.schedule("0 0 * * *", async () => {
+//   CrawlData();
+// });
