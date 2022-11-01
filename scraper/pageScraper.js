@@ -262,6 +262,7 @@ const scraperObject = {
               seller,
               vehicle_detail,
               performance_check,
+              is_hotsale: false,
             };
           });
 
