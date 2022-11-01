@@ -43,6 +43,21 @@ const scraperObject = {
         return data;
       });
 
+      category = listTypeCar.filter((item, index) => {
+        return listTypeCar.indexOf(item) === index;
+      });
+
+      for (let i = 0; i < category.length; i++) {
+        const axios = require("axios");
+        try {
+          await axios.post(`${process.env.BASE_URL}/api/cars/save-type`, {
+            car_type_name: category[i],
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
       let pagePromise = (link) =>
         new Promise(async (resolve, reject) => {
           let dataObj = {};
@@ -73,6 +88,8 @@ const scraperObject = {
             let car_name =
               document.querySelector(".text_subject") &&
               document.querySelector(".text_subject").textContent;
+            let category = car_name.split(" ")[0].trim();
+
             let price =
               (document.querySelector(".detail_wrap td .txt_price") &&
                 document.querySelector(".detail_wrap td .txt_price")
@@ -98,6 +115,12 @@ const scraperObject = {
               document.querySelector(
                 ".detail_info1 tbody tr:nth-child(2) td:nth-child(4)"
               ).textContent;
+
+            if (year_manufacture.includes("/")) {
+              year_manufacture = `20${year_manufacture
+                .split("/")[0]
+                .trim()}`.trim();
+            }
 
             let distance_driven = document.querySelector(
               ".detail_info1 tbody tr:nth-child(3) td:nth-child(2)"
@@ -234,6 +257,7 @@ const scraperObject = {
                 mortgage,
                 presentation_number,
                 storage_location,
+                category,
               },
               seller,
               vehicle_detail,
@@ -260,20 +284,6 @@ const scraperObject = {
           } catch (error) {
             console.log(error);
           }
-        }
-      }
-      category = listTypeCar.filter((item, index) => {
-        return listTypeCar.indexOf(item) === index;
-      });
-
-      for (let i = 0; i < category.length; i++) {
-        const axios = require("axios");
-        try {
-          await axios.post(`${process.env.BASE_URL}/api/cars/save-type`, {
-            car_type_name: category[i],
-          });
-        } catch (error) {
-          console.log(error);
         }
       }
 
