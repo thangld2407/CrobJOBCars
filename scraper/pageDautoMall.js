@@ -37,15 +37,30 @@ const scraperObject = {
         .find((frame) => frame.name() === "body_IFrame");
 
       await frame.waitForSelector(".form1");
-      await frame.addScriptTag({
-        parent: linkPage(2),
+
+      let data = await frame.evaluate(() => {
+        let data = [];
+        let elements = document.querySelectorAll(".tb01 tbody tr");
+
+        for (let el of elements) {
+          // let obj = {};
+          let photo = el && el.querySelector(".TDmodel .photo");
+          if (photo) {
+            data.push(photo.querySelector("img").src);
+          }
+        }
+
+        return data;
       });
-      await frame.waitForSelector(".form1");
+
+      dataFile.push(data);
+      console.log(dataFile);
       // }
 
-      // await browser.close();
+      await browser.close();
     } catch (error) {
-      this.scraper(browser);
+      // this.scraper(browser);
+      console.log(error);
     }
   },
 };
