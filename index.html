@@ -995,10 +995,56 @@
   </tbody>
 </table>
 
+<div class="pageWp">
+  <div class="pagination">
+    <a href="#" class="PrevPrev" onclick="parent.linkPage(1); return false;"></a
+    >&nbsp;<a
+      href="#"
+      class="arrowPrev"
+      onclick="parent.linkPage(1); return false;"
+    ></a
+    >&nbsp;<a class="active">1</a>&nbsp;<a
+      href="#"
+      onclick="parent.linkPage(2); return false;"
+      >2</a
+    >&nbsp;<a href="#" onclick="parent.linkPage(3); return false;">3</a>&nbsp;<a
+      href="#"
+      onclick="parent.linkPage(4); return false;"
+      >4</a
+    >&nbsp;<a href="#" onclick="parent.linkPage(5); return false;">5</a>&nbsp;<a
+      href="#"
+      onclick="parent.linkPage(6); return false;"
+      >6</a
+    >&nbsp;<a href="#" onclick="parent.linkPage(7); return false;">7</a>&nbsp;<a
+      href="#"
+      onclick="parent.linkPage(8); return false;"
+      >8</a
+    >&nbsp;<a href="#" onclick="parent.linkPage(9); return false;">9</a>&nbsp;<a
+      href="#"
+      onclick="parent.linkPage(10); return false;"
+      >10</a
+    >&nbsp;<a
+      href="#"
+      class="arrowNext"
+      onclick="parent.linkPage(11); return false;"
+    ></a
+    >&nbsp;<a
+      href="#"
+      class="NextNext"
+      onclick="parent.linkPage(280); return false;"
+    ></a
+    >&nbsp;
+
+    <input type="hidden" name="pageIndex" value="1" />
+  </div>
+</div>
+
 <script>
   let card = [];
   let elements = document.querySelectorAll(".tb01 tbody tr");
+  let paginate = document.querySelector(".pageWp .pagination a:nth-child(2)");
 
+  console.log(paginate);
   for (let el of elements) {
     let obj = {};
     let photo = el && el.querySelector(".TDmodel .photo img");
@@ -1016,5 +1062,4 @@
       card.push(obj);
     }
   }
-  console.log(card);
 </script>
