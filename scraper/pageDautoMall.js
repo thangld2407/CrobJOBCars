@@ -1,93 +1,113 @@
 require("dotenv").config();
 const fs = require("fs");
+const { delay } = require("lodash");
 
 const scraperObject = {
   url: "https://dautomall.com",
+  regexCarCode: /[A-Z][0-9]\d+/g,
   async scraper(browser) {
     try {
-      let dataFile = [];
-      let pageTemp = await browser.newPage();
+      let page = await browser.newPage();
 
-      await pageTemp.setViewport({ width: 1500, height: 800 });
+      console.log(
+        `Đang chuyển hướng đến trang ${this.url}/BuyCar/BuyCarDomesticList.do...`
+      );
 
-      console.log(`Navigating to ${this.url}/BuyCar/BuyCarDomesticBody.do ...`);
-      await pageTemp.goto(`${this.url}/BuyCar/BuyCarDomesticList.do`);
+      await page.goto(`${this.url}/BuyCar/BuyCarDomesticList.do`);
 
-      const frame = pageTemp
-        .frames()
-        .find((frame) => frame.name() === "body_IFrame");
+      console.log("Đang chờ 5 giây để tải trang...");
 
-      await frame.waitForSelector(".form1");
+      await page.waitForSelector(".sch_result");
 
-      await pageTemp.waitForSelector(".secMdle");
+      const frame = await page.frames().find((f) => f.name() === "body_IFrame");
 
-      let totalPage = await frame.evaluate(() => {
-        let lastPage = document
-          .querySelector(".pageWp .pagination a.NextNext")
-          .getAttribute("onclick")
-          .trim()
-          .split("(")[1]
-          .split(")")[0]
-          .trim();
-        return lastPage;
+      await frame.waitForSelector(".form1 .secMdle");
+      await frame.waitForSelector(".form1 .secMdle .pagination");
+
+      const totalPage = await frame.evaluate(() => {
+        const lastPage = document
+          .querySelector(".pagination .NextNext")
+          .getAttribute("onclick");
+        return lastPage.match(/\d+/)[0];
       });
 
-      console.log("Đã lấy được tổng số trang là", totalPage);
+      console.log(`Tổng số trang: ${totalPage}`);
 
-      let page = 1;
-      do {
-        page++;
-        console.log(page);
-        // Lấy số pagination trong 1 trang
-        let pagination = await frame.evaluate(() => {
-          let pagination = document.querySelectorAll(".pageWp .pagination a");
-          return pagination.length;
+      await frame.waitForSelector(".form1 .secMdle");
+
+      await frame.waitForSelector(".form1 .tb01");
+
+      await frame.waitForSelector(".form1 .secMdle .pagination a");
+
+      console.log("Đang lấy danh sách xe...");
+
+      const dataFile = [];
+
+      for (let i = 1; i <= 1; i++) {
+        console.log("Lấy số trang có trong phạm vi: ", i);
+
+        const numberPaginationInPage = await frame.evaluate(() => {
+          let paginate = document.querySelectorAll(
+            ".secMdle .pagination a"
+          ).length;
+
+          return paginate;
         });
 
-        console.log("Đã lấy được số pagination là", pagination);
-        for (let i = 2; i <= 4; i++) {
-          console.log("Chuyển đến trang số", i - 1);
-          await frame.click(`.pageWp .pagination a:nth-child(${i + 1})`, {
-            waitUntil: "networkidle2",
-          });
-          await frame.waitForSelector(".secMdle .tb01");
+        console.log("Đã lấy được số trang phạm vi", numberPaginationInPage);
 
-          let dt = await frame.evaluate(() => {
-            let data = [];
-            let elements = document.querySelectorAll(".tb01 tbody tr");
+        for (let j = 3; j < 4; j++) {
+          console.log("Chuyển đến trang: ", j - 1);
 
-            for (let el of elements) {
-              let obj = {};
-              let photo = el && el.querySelector(".TDmodel .photo img");
-
-              if (el && el.getAttribute("onclick")) {
-                let link = el.getAttribute("onclick");
-                obj.link = link;
-              }
-
-              if (photo) {
-                obj.image = photo.src;
-              }
-
-              if (Object.keys(obj).length > 0) {
-                data.push(obj);
-              }
-            }
-            return data;
+          await frame.evaluate((j) => {
+            document
+              .querySelector(`.secMdle .pagination a:nth-child(${3})`)
+              .click();
           });
 
-          dataFile = [...dataFile, ...dt];
+          await frame.waitForSelector(".secMdle .pagination a");
+
+
+          console.log(`Đang lấy danh sách xe trang ${j - 1}...`);
+
+          await frame.waitForSelector(".tb01");
+
+          // const carList = await frame.evaluate(() => {
+          //   const carList = document.querySelectorAll(
+          //     ".secMdle .tb01 tr:not(:first-child)"
+          //   );
+          //   const list = [];
+          //   carList.forEach((car) => {
+          //     const car_code = car
+          //       .getAttribute("onclick")
+          //       .match(this.regexCarCode)[0];
+
+          //     const carInfo = {
+          //       sCarProductCode: car_code,
+          //     };
+          //     list.push(carInfo);
+          //   });
+          //   return list;
+          // });
+
+          // console.log(`Đã lấy được ${carList.length} xe từ trang ${i}`);
+
+          // dataFile.push(...carList);
         }
-        await frame.click(" .pageWp .pagination a.arrowNext", { waitUntil: "networkidle2" });
-        await frame.waitForSelector(".secMdle .tb01");
-      } while (page < totalPage / 10);
 
-      console.log("Đã lấy được tổng số dòng là", dataFile[dataFile.length - 1]);
+        console.log("Đã lấy được tất cả xe từ trang", i);
+
+        await frame.waitForSelector(".tb01");
+      }
+
+      console.log("Đã lấy được danh sách xe");
+
+      console.log("Đang lưu danh sách xe vào file...");
+
       fs.writeFileSync("dautomall.json", JSON.stringify(dataFile));
-      await pageTemp.close();
     } catch (error) {
-      this.scraper(browser);
-      console.log(error);
+      console.log("Lỗi ", error);
+      // this.scraper(browser);
     }
   },
 };
