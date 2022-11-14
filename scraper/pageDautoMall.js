@@ -2,12 +2,21 @@ require("dotenv").config();
 const fs = require("fs");
 const { delay } = require("lodash");
 
+function sleep(seconds) {
+  return new Promise((resolve, reject) => setTimeout(resolve, seconds));
+}
+
 const scraperObject = {
   url: "https://dautomall.com",
   regexCarCode: /[A-Z][0-9]\d+/g,
   async scraper(browser) {
     try {
       let page = await browser.newPage();
+
+      await page.setViewport({
+        width: 1200,
+        height: 800,
+      });
 
       console.log(
         `Đang chuyển hướng đến trang ${this.url}/BuyCar/BuyCarDomesticList.do...`
@@ -56,43 +65,46 @@ const scraperObject = {
 
         console.log("Đã lấy được số trang phạm vi", numberPaginationInPage);
 
-        for (let j = 3; j < 4; j++) {
+        for (let j = 3; j <= numberPaginationInPage - 1; j++) {
           console.log("Chuyển đến trang: ", j - 1);
 
-          await frame.evaluate((j) => {
-            document
-              .querySelector(`.secMdle .pagination a:nth-child(${3})`)
-              .click();
-          });
+          await sleep(5000);
+
+          // await frame.evaluate((j) => {
+          //   document
+          //     .querySelector(`.secMdle .pagination a:nth-child(${5})`)
+          //     .click();
+          // });
 
           await frame.waitForSelector(".secMdle .pagination a");
 
-
           console.log(`Đang lấy danh sách xe trang ${j - 1}...`);
 
-          await frame.waitForSelector(".tb01");
+          await frame.waitForSelector(".form1 .tb01");
 
-          // const carList = await frame.evaluate(() => {
-          //   const carList = document.querySelectorAll(
-          //     ".secMdle .tb01 tr:not(:first-child)"
-          //   );
-          //   const list = [];
-          //   carList.forEach((car) => {
-          //     const car_code = car
-          //       .getAttribute("onclick")
-          //       .match(this.regexCarCode)[0];
+          const carList = await frame.evaluate(() => {
+            const carList = document.querySelectorAll(
+              ".secMdle .tb01 tr:not(:first-child)"
+            );
+            const list = [];
+            carList.forEach((car) => {
+              const car_code = car.getAttribute("onclick");
 
-          //     const carInfo = {
-          //       sCarProductCode: car_code,
-          //     };
-          //     list.push(carInfo);
-          //   });
-          //   return list;
-          // });
+              const carInfo = {
+                sCarProductCode: car_code,
+              };
+              list.push(carInfo);
+            });
+            return list;
+          });
 
-          // console.log(`Đã lấy được ${carList.length} xe từ trang ${i}`);
+          console.log(`Đã lấy được ${carList.length} xe từ trang ${i}`);
 
-          // dataFile.push(...carList);
+          dataFile.push(...carList);
+
+          await frame.click(`.secMdle .pagination a:nth-child(${j - 1})`, {});
+
+          await sleep(5000);
         }
 
         console.log("Đã lấy được tất cả xe từ trang", i);
