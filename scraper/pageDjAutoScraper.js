@@ -10,7 +10,7 @@ const scraperObject = {
       let pageTemp = await browser.newPage();
       console.log(`Navigating to  ${this.url}...`);
 
-      for (let n = 1; n <= 2; n++) {
+      for (let n = 1; n <= 1; n++) {
         this.count = n;
         await pageTemp.goto(`${this.url}?cho=${n}`);
         await pageTemp.waitForSelector(".car_list tbody");
@@ -24,7 +24,7 @@ const scraperObject = {
             .split("=")[1];
         });
 
-        for (let i = count || 1; i <= 2; i++) {
+        for (let i = count || 3; i <= 2; i++) {
           this.count = i;
           let page = await browser.newPage();
           console.log(`Navigating to ${this.url}?cho=${n}&page=${i}...`);
@@ -51,20 +51,20 @@ const scraperObject = {
             return data;
           });
 
-          category = listTypeCar.filter((item, index) => {
-            return listTypeCar.indexOf(item) === index;
-          });
+          // category = listTypeCar.filter((item, index) => {
+          //   return listTypeCar.indexOf(item) === index;
+          // });
 
-          for (let i = 0; i < category.length; i++) {
-            const axios = require("axios");
-            try {
-              await axios.post(`${process.env.BASE_URL}/api/category/save`, {
-                category_name: category[i],
-              });
-            } catch (error) {
-              console.log(error);
-            }
-          }
+          // for (let i = 0; i < category.length; i++) {
+          //   const axios = require("axios");
+          //   try {
+          //     await axios.post(`${process.env.BASE_URL}/api/category/save`, {
+          //       category_name: category[i],
+          //     });
+          //   } catch (error) {
+          //     console.log(error);
+          //   }
+          // }
 
           let pagePromise = (link) =>
             new Promise(async (resolve, reject) => {
@@ -263,7 +263,7 @@ const scraperObject = {
                     basic_infor: {
                       list_image: imageList,
                       car_name,
-                      price: price.replace(/,/g, ""),
+                      price,
                       car_code: s_carCode,
                       license_plate,
                       year_manufacture,
@@ -299,7 +299,7 @@ const scraperObject = {
               );
               dataFile.push(currentDetails);
               const axios = require("axios");
-              if (i <= 5) {
+              if (i <= 1) {
                 try {
                   await axios.post(`${process.env.BASE_URL}/api/cars/save`, {
                     data: currentDetails,
