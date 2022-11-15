@@ -3,6 +3,7 @@ const fs = require("fs");
 const scraperObject = {
   url: "https://www.djauto.co.kr/car/carList.html",
   count: 0,
+  countCho: 1,
   async scraper(browser, count) {
     try {
       let dataFile = [];
@@ -10,9 +11,11 @@ const scraperObject = {
       let pageTemp = await browser.newPage();
       console.log(`Navigating to  ${this.url}...`);
 
-      for (let n = 1; n <= 1; n++) {
-        this.count = n;
-        await pageTemp.goto(`${this.url}?cho=${n}`);
+      for (let n = 1; n <= 2; n++) {
+        this.countCho = n;
+
+        await pageTemp.goto(`${this.url}?cho=${this.countCho}`);
+
         await pageTemp.waitForSelector(".car_list tbody");
 
         let totalPage = await pageTemp.evaluate(() => {
@@ -24,7 +27,7 @@ const scraperObject = {
             .split("=")[1];
         });
 
-        for (let i = count || 3; i <= 2; i++) {
+        for (let i = this.count === 0 ? 1 : this.count; i <= 3; i++) {
           this.count = i;
           let page = await browser.newPage();
           console.log(`Navigating to ${this.url}?cho=${n}&page=${i}...`);
@@ -317,6 +320,8 @@ const scraperObject = {
 
           await page.close();
         }
+
+        this.count = 1;
       }
       fs.writeFileSync("type.json", JSON.stringify(category));
 
@@ -327,6 +332,7 @@ const scraperObject = {
       await browser.close();
     } catch (error) {
       console.log("Navigate to page error: ", this.count);
+      console.log(error);
       this.scraper(browser, this.count);
     }
   },
