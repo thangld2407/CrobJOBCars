@@ -1,4 +1,4 @@
-const pageDautoMall = require("../scraper/pageDautoMall");
+const pageDautoMall = require("../scraper/page_dautomall");
 async function scrapeAll(browserInstance) {
   let browser;
   try {
