@@ -40,7 +40,6 @@ const scraperObject = {
             return data;
           });
 
-
           let pagePromise = (link) =>
             new Promise(async (resolve, reject) => {
               try {
@@ -297,7 +296,6 @@ const scraperObject = {
         }
       }
 
-      fs.writeFileSync("data.json", JSON.stringify(dataFile));
       console.log("Done crawling");
 
       await pageTemp.close();
