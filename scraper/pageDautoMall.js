@@ -50,9 +50,9 @@ const scraperObject = {
 
       console.log("Đang lấy danh sách xe...");
 
-      const dataFile = [];
+      let dataFile = [];
 
-      for (let i = 1; i <= 1; i++) {
+      for (let i = 1; i <= 25; i++) {
         console.log("Lấy số trang có trong phạm vi: ", i);
 
         const numberPaginationInPage = await frame.evaluate(() => {
@@ -65,8 +65,8 @@ const scraperObject = {
 
         console.log("Đã lấy được số trang phạm vi", numberPaginationInPage);
 
-        for (let j = 3; j <= numberPaginationInPage - 1; j++) {
-          console.log("Chuyển đến trang: ", j - 1);
+        for (let j = 4; j <= numberPaginationInPage - 1; j++) {
+          console.log("Đang lấy thông tin xe trang : ", j - 1);
 
           await sleep(5000);
 
@@ -100,9 +100,9 @@ const scraperObject = {
 
           console.log(`Đã lấy được ${carList.length} xe từ trang ${i}`);
 
-          dataFile.push(...carList);
+          dataFile = [...dataFile, ...carList];
 
-          await frame.click(`.secMdle .pagination a:nth-child(${j - 1})`, {});
+          await frame.click(`.secMdle .pagination a:nth-child(${j})`, {});
 
           await sleep(5000);
         }
@@ -110,6 +110,10 @@ const scraperObject = {
         console.log("Đã lấy được tất cả xe từ trang", i);
 
         await frame.waitForSelector(".tb01");
+
+        await frame.click(`.secMdle .pagination a:last-child()`, {});
+
+        await sleep(5000);
       }
 
       console.log("Đã lấy được danh sách xe");
@@ -117,6 +121,10 @@ const scraperObject = {
       console.log("Đang lưu danh sách xe vào file...");
 
       fs.writeFileSync("dautomall.json", JSON.stringify(dataFile));
+
+      console.log("Đã lưu danh sách xe vào file");
+
+      await page.close();
     } catch (error) {
       console.log("Lỗi ", error);
       // this.scraper(browser);
