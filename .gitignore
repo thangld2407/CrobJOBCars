@@ -15,3 +15,5 @@ yarn-error.log
 # remove public file css
 public/css/main.css.map
 public/css/main.css
+
+./*.json

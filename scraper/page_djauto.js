@@ -7,14 +7,11 @@ const scraperObject = {
   async scraper(browser, count) {
     try {
       let dataFile = [];
-      let category;
       let pageTemp = await browser.newPage();
       console.log(`Navigating to  ${this.url}...`);
 
       for (let n = 1; n <= 2; n++) {
-        this.countCho = n;
-
-        await pageTemp.goto(`${this.url}?cho=${this.countCho}`);
+        await pageTemp.goto(`${this.url}?cho=${n}`);
 
         await pageTemp.waitForSelector(".car_list tbody");
 
@@ -27,8 +24,7 @@ const scraperObject = {
             .split("=")[1];
         });
 
-        for (let i = this.count === 0 ? 1 : this.count; i <= 3; i++) {
-          this.count = i;
+        for (let i = count || 1; i <= totalPage; i++) {
           let page = await browser.newPage();
           console.log(`Navigating to ${this.url}?cho=${n}&page=${i}...`);
 
@@ -43,31 +39,6 @@ const scraperObject = {
             });
             return data;
           });
-
-          let listTypeCar = await page.evaluate(() => {
-            let data = [];
-            document.querySelectorAll("td a.subject").forEach((item, index) => {
-              data.push(
-                item.textContent.trim().split("[")[1].split("]")[0].trim()
-              );
-            });
-            return data;
-          });
-
-          // category = listTypeCar.filter((item, index) => {
-          //   return listTypeCar.indexOf(item) === index;
-          // });
-
-          // for (let i = 0; i < category.length; i++) {
-          //   const axios = require("axios");
-          //   try {
-          //     await axios.post(`${process.env.BASE_URL}/api/category/save`, {
-          //       category_name: category[i],
-          //     });
-          //   } catch (error) {
-          //     console.log(error);
-          //   }
-          // }
 
           let pagePromise = (link) =>
             new Promise(async (resolve, reject) => {
@@ -302,37 +273,35 @@ const scraperObject = {
               );
               dataFile.push(currentDetails);
               const axios = require("axios");
-              if (i <= 1) {
-                try {
-                  await axios.post(`${process.env.BASE_URL}/api/cars/save`, {
+              try {
+                const response = await axios.post(
+                  `${process.env.BASE_URL}/api/cars/save`,
+                  {
                     data: currentDetails,
-                  });
-                } catch (error) {
-                  console.log(
-                    "Navigate to page error catch save cars: ",
-                    this.count
-                  );
-                  this.scraper(browser, this.count);
-                }
+                  }
+                );
+                console.log(response.data.message);
+              } catch (error) {
+                console.log(
+                  "Navigate to page error catch save cars: ",
+                  this.count
+                );
+                console.log(error.data.message);
+                this.scraper(browser, count);
               }
             }
           }
 
           await page.close();
         }
-
-        this.count = 1;
       }
-      fs.writeFileSync("type.json", JSON.stringify(category));
 
-      fs.writeFileSync("data.json", JSON.stringify(dataFile));
       console.log("Done crawling");
 
       await pageTemp.close();
       await browser.close();
     } catch (error) {
       console.log("Navigate to page error: ", this.count);
-      console.log(error);
       this.scraper(browser, this.count);
     }
   },
