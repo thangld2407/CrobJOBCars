@@ -18,13 +18,14 @@ const scraperObject = {
         height: 800,
       });
 
-      console.log(
-        `Đang chuyển hướng đến trang ${this.url}/BuyCar/BuyCarDomesticList.do...`
-      );
+      console.log('============================================================================');
+      console.log(`| SETUP CRAWL DATA WEBSITE - ${this.url}`);
 
       await page.goto(`${this.url}/BuyCar/BuyCarDomesticList.do`);
+      await sleep(5000);
 
-      console.log("Đang chờ 5 giây để tải trang...");
+      console.log('============================================================================');
+      console.log('| START CRAWL DATA');
 
       await page.waitForSelector(".sch_result");
 
@@ -40,7 +41,10 @@ const scraperObject = {
         return lastPage.match(/\d+/)[0];
       });
 
-      console.log(`Tổng số trang: ${totalPage}`);
+      await sleep(1000);
+      console.log('============================================================================');
+      console.log(`| TOTAL PAGE: ${totalPage}`);
+      await sleep(1000);
 
       await frame.waitForSelector(".form1 .secMdle");
 
@@ -48,75 +52,67 @@ const scraperObject = {
 
       await frame.waitForSelector(".form1 .secMdle .pagination a");
 
-      console.log("Đang lấy danh sách xe...");
-
       let dataFile = [];
 
-      for (let i = 1; i <= 25; i++) {
-        console.log("Lấy số trang có trong phạm vi: ", i);
+      let pageNumber = 1;
 
-        const numberPaginationInPage = await frame.evaluate(() => {
-          let paginate = document.querySelectorAll(
-            ".secMdle .pagination a"
-          ).length;
+      const positionClick = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+      let position = 0;
 
-          return paginate;
-        });
-
-        console.log("Đã lấy được số trang phạm vi", numberPaginationInPage);
-
-        for (let j = 4; j <= numberPaginationInPage - 1; j++) {
-          console.log("Đang lấy thông tin xe trang : ", j - 1);
-
-          await sleep(5000);
-
-          // await frame.evaluate((j) => {
-          //   document
-          //     .querySelector(`.secMdle .pagination a:nth-child(${5})`)
-          //     .click();
-          // });
-
-          await frame.waitForSelector(".secMdle .pagination a");
-
-          console.log(`Đang lấy danh sách xe trang ${j - 1}...`);
-
-          await frame.waitForSelector(".form1 .tb01");
-
-          const carList = await frame.evaluate(() => {
-            const carList = document.querySelectorAll(
-              ".secMdle .tb01 tr:not(:first-child)"
-            );
-            const list = [];
-            carList.forEach((car) => {
-              const car_code = car.getAttribute("onclick");
-
-              const carInfo = {
-                sCarProductCode: car_code,
-              };
-              list.push(carInfo);
-            });
-            return list;
-          });
-
-          console.log(`Đã lấy được ${carList.length} xe từ trang ${i}`);
-
-          dataFile = [...dataFile, ...carList];
-
-          await frame.click(`.secMdle .pagination a:nth-child(${j})`, {});
-
-          await sleep(5000);
+      while (pageNumber <= totalPage) {
+        if (position >= 10) {
+          position = 0;
         }
 
-        console.log("Đã lấy được tất cả xe từ trang", i);
-
-        await frame.waitForSelector(".tb01");
-
-        await frame.click(`.secMdle .pagination a:last-child()`, {});
-
+        console.log('============================================================================');
+        console.log(`| CURRENT PAGE: [ ${pageNumber} ] - INDEX PAGINATION [ ${positionClick[position]} ]`);
+        
         await sleep(5000);
+        await frame.waitForSelector(".secMdle .pagination a");
+        await frame.waitForSelector(".form1 .tb01");
+        const carList = await frame.evaluate(() => {
+          const carList = document.querySelectorAll(
+            ".secMdle .tb01 tr:not(:first-child)"
+          );
+          const list = [];
+          carList.forEach((car) => {
+            const car_code = car.getAttribute("onclick");
+
+            const carInfo = {
+              sCarProductCode: car_code,
+            };
+            list.push(carInfo);
+          });
+          return list;
+        });
+
+        dataFile = [...dataFile, ...carList];
+
+        position = position + 1;
+
+        if (position > 0  && pageNumber < totalPage) {
+          let TEXT = '';
+
+          if (position === 0) {
+            TEXT = '0';
+          } else if (position === 10) {
+            TEXT = 'NEXT';
+          } else {
+            TEXT = `${position + 1}`;
+          }
+
+          console.log('============================================================================');
+          console.log(`| CLICK PAGE: [ ${TEXT} ]`);
+          await frame.click(`.secMdle .pagination a:nth-child(${positionClick[position]})`, {});
+        }
+
+        await sleep(5000);        
+
+        pageNumber++;
       }
 
-      console.log("Đã lấy được danh sách xe");
+      console.log('============================================================================');
+      console.log('| STOP CRAWL DATA');
 
       console.log("Đang lưu danh sách xe vào file...");
 
