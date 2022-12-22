@@ -319,7 +319,7 @@ async function pagePromise(browser, link) {
       ...dataObj,
       basic_infor: {
         ...dataObj.basic_infor,
-        car: convertNameToModel(dataObj.basic_infor.car_name),
+        model: convertNameToModel(dataObj.basic_infor.car_name),
       },
     };
   } catch (error) {
