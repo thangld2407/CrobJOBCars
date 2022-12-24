@@ -4,13 +4,13 @@ function convertNameToModel(name) {
   if (nameTrim.length > 0) {
     const arrName = nameTrim.split(" ");
     if (arrName[1].length === 1) {
-      model = arrName[1] + " " + arrName[2];
+      model = arrName[1] + " " + arrName[2] || "";
     } else {
-      model = arrName[1];
+      model = arrName[1] || "";
     }
   }
 
-  return model.trim();
+  return model.trim() || "";
 }
 
 module.exports = convertNameToModel;
