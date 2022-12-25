@@ -1,131 +1,248 @@
 require("dotenv").config();
 const fs = require("fs");
-const { delay } = require("lodash");
+const { startBrowser } = require("../browser");
 
 function sleep(seconds) {
   return new Promise((resolve, reject) => setTimeout(resolve, seconds));
 }
 
-const scraperObject = {
-  url: "https://dautomall.com",
-  regexCarCode: /[A-Z][0-9]\d+/g,
-  async scraper(browser) {
-    try {
-      let page = await browser.newPage();
+async function detailCars(car_code, page) {
+  try {
+    await page.goto(`${url}/BuyCar/BuyCarView.do?sCarProductCode=${car_code}`, {
+      waitUntil: "domcontentloaded",
+    });
 
-      await page.setViewport({
-        width: 1200,
-        height: 800,
+    const listImage = await page.evaluate(() => {
+      let lists = [];
+      const ellistImage = document.querySelectorAll(".slide.slick-slide");
+      ellistImage.forEach((elImage) => {
+        let src = elImage.getAttribute("style").trim();
+        src = src.replace("background-image: url(", "");
+        src = src.replace(`)`, "");
+        src = src.replace(`'`, "");
+        src = src.split(";")[0];
+        src = src.replace(`'`, "");
+        lists.push(src);
       });
+      return lists;
+    });
+    const car_name = await page.evaluate(() => {
+      let name = document.querySelector(".infoWp .secTop h3").innerText;
+      return name;
+    });
 
-      console.log('============================================================================');
-      console.log(`| SETUP CRAWL DATA WEBSITE - ${this.url}`);
+    const price = await page.evaluate(() => {
+      let _price = document.querySelector(".infoWp .price h1").innerText;
+      return Number(_price.replace(/[^0-9]/g, "")) || 0;
+    });
 
-      await page.goto(`${this.url}/BuyCar/BuyCarDomesticList.do`);
-      await sleep(5000);
+    const basic_infr = await page.evaluate(() => {
+      let obj = {};
+      let elBasicInfr = document.querySelector("#basic_infr .tb02");
+      let year_manufacture = elBasicInfr.querySelector("tr:nth-child(1) td:nth-child(2)").innerText;
+      let color = elBasicInfr.querySelector("tr:nth-child(1) td:nth-child(4)").innerText;
+      let fuel_type = elBasicInfr.querySelector("tr:nth-child(2) td:nth-child(2)").innerText;
+      let distance_driven = elBasicInfr.querySelector("tr:nth-child(2) td:nth-child(4)").innerText;
+      let plate_number = elBasicInfr.querySelector("tr:nth-child(3) td:nth-child(2)").innerText;
+      let transmission = elBasicInfr.querySelector("tr:nth-child(3) td:nth-child(4)").innerText;
+      let presentation_number = elBasicInfr.querySelector("tr:nth-child(4) td:nth-child(2)").innerText;
+      obj = {
+        ...obj,
+        year_manufacture:
+          Number(year_manufacture.replace(/[^0-9]/g, "").slice(0, 4)) || 0,
+        color,
+        fuel_type,
+        distance_driven: Number(distance_driven.replace(/[^0-9]/g, "")) || 0,
+        plate_number,
+        transmission,
+        presentation_number,
+      };
 
-      console.log('============================================================================');
-      console.log('| START CRAWL DATA');
+      return obj;
+    });
 
-      await page.waitForSelector(".sch_result");
-
-      const frame = await page.frames().find((f) => f.name() === "body_IFrame");
-
-      await frame.waitForSelector(".form1 .secMdle");
-      await frame.waitForSelector(".form1 .secMdle .pagination");
-
-      const totalPage = await frame.evaluate(() => {
-        const lastPage = document
-          .querySelector(".pagination .NextNext")
-          .getAttribute("onclick");
-        return lastPage.match(/\d+/)[0];
-      });
-
-      await sleep(1000);
-      console.log('============================================================================');
-      console.log(`| TOTAL PAGE: ${totalPage}`);
-      await sleep(1000);
-
-      await frame.waitForSelector(".form1 .secMdle");
-
-      await frame.waitForSelector(".form1 .tb01");
-
-      await frame.waitForSelector(".form1 .secMdle .pagination a");
-
-      let dataFile = [];
-
-      let pageNumber = 1;
-
-      const positionClick = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-      let position = 0;
-
-      while (pageNumber <= totalPage) {
-        if (position >= 10) {
-          position = 0;
-        }
-
-        console.log('============================================================================');
-        console.log(`| CURRENT PAGE: [ ${pageNumber} ] - INDEX PAGINATION [ ${positionClick[position]} ]`);
-        
-        await sleep(5000);
-        await frame.waitForSelector(".secMdle .pagination a");
-        await frame.waitForSelector(".form1 .tb01");
-        const carList = await frame.evaluate(() => {
-          const carList = document.querySelectorAll(
-            ".secMdle .tb01 tr:not(:first-child)"
-          );
-          const list = [];
-          carList.forEach((car) => {
-            const car_code = car.getAttribute("onclick");
-
-            const carInfo = {
-              sCarProductCode: car_code,
-            };
-            list.push(carInfo);
-          });
-          return list;
-        });
-
-        dataFile = [...dataFile, ...carList];
-
-        position = position + 1;
-
-        if (position > 0  && pageNumber < totalPage) {
-          let TEXT = '';
-
-          if (position === 0) {
-            TEXT = '0';
-          } else if (position === 10) {
-            TEXT = 'NEXT';
-          } else {
-            TEXT = `${position + 1}`;
+    const convenience_infr = await page.evaluate(() => {
+      let listConvenience = [];
+      let elBasicInfr = document.querySelector("#BuyCarPopup_Option");
+      elBasicInfr.style.display = "block";
+      let elTr = elBasicInfr.querySelectorAll(".tb03 tr");
+      elTr.forEach((el) => {
+        let elTd = el.querySelectorAll("td");
+        elTd.forEach((_el_td) => {
+          let text = _el_td.innerText.trim();
+          if (text) {
+            listConvenience.push(text);
           }
+        });
+      });
 
-          console.log('============================================================================');
-          console.log(`| CLICK PAGE: [ ${TEXT} ]`);
-          await frame.click(`.secMdle .pagination a:nth-child(${positionClick[position]})`, {});
-        }
+      return listConvenience;
+    });
 
-        await sleep(5000);        
+    const car_model = await page.evaluate(() => {
+      let carModelEl = document.querySelector(".wd50p.price_wp h5").innerText;
+      return carModelEl;
 
-        pageNumber++;
+    });
+
+    await page.close();
+    return {
+      car_code,
+      car_model,
+      listImage,
+      car_name,
+      price,
+      basic_infr,
+      convenience_infr,
+    };
+  } catch (error) {
+    console.log("Lỗi ", error);
+  }
+}
+
+const url = "https://dautomall.com";
+
+async function scrapDautomall() {
+  console.time("CRAWL DATA");
+
+  const browser = await startBrowser();
+  try {
+    let page = await browser.newPage();
+
+    await page.setViewport({
+      width: 1200,
+      height: 800,
+    });
+
+    console.log("============================================================================");
+    console.log(`| SETUP CRAWL DATA WEBSITE - ${url}`);
+
+    await page.goto(`${url}/BuyCar/BuyCarDomesticList.do`);
+    await sleep(5000);
+
+    console.log("============================================================================");
+    console.log("| START CRAWL DATA");
+
+    await page.waitForSelector(".sch_result");
+
+    const frame = await page.frames().find((f) => f.name() === "body_IFrame");
+
+    await frame.waitForSelector(".form1 .secMdle");
+    await frame.waitForSelector(".form1 .secMdle .pagination");
+
+    // const totalPage = await frame.evaluate(() => {
+    //   const lastPage = document
+    //     .querySelector(".pagination .NextNext")
+    //     .getAttribute("onclick");
+    //   return lastPage.match(/\d+/)[0];
+    // });
+    const totalPage = 2;
+
+    await sleep(1000);
+    console.log("============================================================================");
+    console.log(`| TOTAL PAGE: ${totalPage}`);
+    await sleep(1000);
+
+    await frame.waitForSelector(".form1 .secMdle");
+
+    await frame.waitForSelector(".form1 .tb01");
+
+    await frame.waitForSelector(".form1 .secMdle .pagination a");
+
+    let dataFile = [];
+
+    let pageNumber = 1;
+
+    const positionClick = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+    let position = 0;
+
+    while (pageNumber <= totalPage) {
+      if (position >= 10) {
+        position = 0;
       }
 
-      console.log('============================================================================');
-      console.log('| STOP CRAWL DATA');
+      console.log("============================================================================");
+      console.log(`| CURRENT PAGE: [ ${pageNumber} ] - INDEX PAGINATION [ ${positionClick[position]} ]`);
 
-      console.log("Đang lưu danh sách xe vào file...");
+      await sleep(5000);
+      await frame.waitForSelector(".secMdle .pagination a");
+      await frame.waitForSelector(".form1 .tb01");
+      const carList = await frame.evaluate(async () => {
+        console.log("Car LIST RUN");
+        const elCarList = document.querySelectorAll(
+          ".secMdle .tb01 tr:not(:first-child)"
+        );
+        const list = [];
 
-      fs.writeFileSync("dautomall.json", JSON.stringify(dataFile));
+        elCarList.forEach((car) => {
+          console.log("CAR: ", car);
 
-      console.log("Đã lưu danh sách xe vào file");
+          const car_code = car.getAttribute("onclick");
+          console.log("vào đây", car_code);
+          console.log("qua chi tiết");
 
-      await page.close();
-    } catch (error) {
-      console.log("Lỗi ", error);
-      // this.scraper(browser);
+          const reGetCode = /(?<=\().+?(?=\))/;
+          let _car_code = car_code.match(reGetCode);
+          _car_code = _car_code[0].split("'");
+
+          if (Array.isArray(_car_code)) {
+            if (_car_code.length >= 2) {
+              _car_code = _car_code[1];
+            }
+          }
+
+          list.push(_car_code);
+        });
+        return list;
+      });
+
+      for (let i = 0; i < carList.length; i++) {
+        const car = carList[i];
+        let pageDetail = await browser.newPage();
+        const detail = await detailCars(car, pageDetail);
+        console.log("DETAIL: ", detail);
+      }
+
+      dataFile = [...dataFile, ...carList];
+
+      position = position + 1;
+
+      if (position > 0 && pageNumber < totalPage) {
+        let TEXT = "";
+
+        if (position === 0) {
+          TEXT = "0";
+        } else if (position === 10) {
+          TEXT = "NEXT";
+        } else {
+          TEXT = `${position + 1}`;
+        }
+
+        console.log("============================================================================");
+        console.log(`| CLICK PAGE: [ ${TEXT} ]`);
+        await frame.click(`.secMdle .pagination a:nth-child(${positionClick[position]})`,{});
+      }
+
+      await sleep(5000);
+
+      pageNumber++;
     }
-  },
-};
 
-module.exports = scraperObject;
+    console.log("============================================================================");
+    console.log("| STOP CRAWL DATA");
+
+    console.log("Đang lưu danh sách xe vào file...");
+
+    fs.writeFileSync("dautomall.json", JSON.stringify(dataFile));
+
+    console.log("Đã lưu danh sách xe vào file");
+
+    await page.close();
+    await browser.close();
+    console.timeEnd("CRAWL DATA");
+  } catch (error) {
+    console.log("Lỗi ", error);
+  }
+}
+
+module.exports = scrapDautomall;
