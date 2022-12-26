@@ -8,6 +8,7 @@ function sleep(seconds) {
 
 async function detailCars(car_code, page) {
   try {
+    await page.setViewport({ width: 1920, height: 1080 });
     await page.goto(`${url}/BuyCar/BuyCarView.do?sCarProductCode=${car_code}`, {
       waitUntil: "domcontentloaded",
     });
@@ -39,13 +40,27 @@ async function detailCars(car_code, page) {
     const basic_infr = await page.evaluate(() => {
       let obj = {};
       let elBasicInfr = document.querySelector("#basic_infr .tb02");
-      let year_manufacture = elBasicInfr.querySelector("tr:nth-child(1) td:nth-child(2)").innerText;
-      let color = elBasicInfr.querySelector("tr:nth-child(1) td:nth-child(4)").innerText;
-      let fuel_type = elBasicInfr.querySelector("tr:nth-child(2) td:nth-child(2)").innerText;
-      let distance_driven = elBasicInfr.querySelector("tr:nth-child(2) td:nth-child(4)").innerText;
-      let plate_number = elBasicInfr.querySelector("tr:nth-child(3) td:nth-child(2)").innerText;
-      let transmission = elBasicInfr.querySelector("tr:nth-child(3) td:nth-child(4)").innerText;
-      let presentation_number = elBasicInfr.querySelector("tr:nth-child(4) td:nth-child(2)").innerText;
+      let year_manufacture = elBasicInfr.querySelector(
+        "tr:nth-child(1) td:nth-child(2)"
+      ).innerText;
+      let color = elBasicInfr.querySelector(
+        "tr:nth-child(1) td:nth-child(4)"
+      ).innerText;
+      let fuel_type = elBasicInfr.querySelector(
+        "tr:nth-child(2) td:nth-child(2)"
+      ).innerText;
+      let distance_driven = elBasicInfr.querySelector(
+        "tr:nth-child(2) td:nth-child(4)"
+      ).innerText;
+      let plate_number = elBasicInfr.querySelector(
+        "tr:nth-child(3) td:nth-child(2)"
+      ).innerText;
+      let transmission = elBasicInfr.querySelector(
+        "tr:nth-child(3) td:nth-child(4)"
+      ).innerText;
+      let presentation_number = elBasicInfr.querySelector(
+        "tr:nth-child(4) td:nth-child(2)"
+      ).innerText;
       obj = {
         ...obj,
         year_manufacture:
@@ -81,19 +96,31 @@ async function detailCars(car_code, page) {
 
     const car_model = await page.evaluate(() => {
       let carModelEl = document.querySelector(".wd50p.price_wp h5").innerText;
-      return carModelEl;
-
+      return carModelEl || "";
     });
 
+    await page.addStyleTag({
+      content: `#BuyCarPopup_Inspect { display: none !important; }`,
+    });
+
+    const frame = await page.$("#checkReport_wp_iframe");
+    const frameContent = await frame.contentFrame();
+  
+
+    const performance_check_link = await frameContent.evaluate(() => {
+      let link = document.querySelector(".btn_checkReportMore").getAttribute("onclick");
+      return link;
+    });
     await page.close();
     return {
       car_code,
-      car_model,
-      listImage,
-      car_name,
-      price,
-      basic_infr,
-      convenience_infr,
+      frameContent,
+      // car_model,
+      // listImage,
+      // car_name,
+      // price,
+      // basic_infr,
+      // convenience_infr,
     };
   } catch (error) {
     console.log("Lỗi ", error);
@@ -114,13 +141,17 @@ async function scrapDautomall() {
       height: 800,
     });
 
-    console.log("============================================================================");
+    console.log(
+      "============================================================================"
+    );
     console.log(`| SETUP CRAWL DATA WEBSITE - ${url}`);
 
     await page.goto(`${url}/BuyCar/BuyCarDomesticList.do`);
     await sleep(5000);
 
-    console.log("============================================================================");
+    console.log(
+      "============================================================================"
+    );
     console.log("| START CRAWL DATA");
 
     await page.waitForSelector(".sch_result");
@@ -139,7 +170,9 @@ async function scrapDautomall() {
     const totalPage = 2;
 
     await sleep(1000);
-    console.log("============================================================================");
+    console.log(
+      "============================================================================"
+    );
     console.log(`| TOTAL PAGE: ${totalPage}`);
     await sleep(1000);
 
@@ -161,8 +194,12 @@ async function scrapDautomall() {
         position = 0;
       }
 
-      console.log("============================================================================");
-      console.log(`| CURRENT PAGE: [ ${pageNumber} ] - INDEX PAGINATION [ ${positionClick[position]} ]`);
+      console.log(
+        "============================================================================"
+      );
+      console.log(
+        `| CURRENT PAGE: [ ${pageNumber} ] - INDEX PAGINATION [ ${positionClick[position]} ]`
+      );
 
       await sleep(5000);
       await frame.waitForSelector(".secMdle .pagination a");
@@ -218,9 +255,14 @@ async function scrapDautomall() {
           TEXT = `${position + 1}`;
         }
 
-        console.log("============================================================================");
+        console.log(
+          "============================================================================"
+        );
         console.log(`| CLICK PAGE: [ ${TEXT} ]`);
-        await frame.click(`.secMdle .pagination a:nth-child(${positionClick[position]})`,{});
+        await frame.click(
+          `.secMdle .pagination a:nth-child(${positionClick[position]})`,
+          {}
+        );
       }
 
       await sleep(5000);
@@ -228,7 +270,9 @@ async function scrapDautomall() {
       pageNumber++;
     }
 
-    console.log("============================================================================");
+    console.log(
+      "============================================================================"
+    );
     console.log("| STOP CRAWL DATA");
 
     console.log("Đang lưu danh sách xe vào file...");
