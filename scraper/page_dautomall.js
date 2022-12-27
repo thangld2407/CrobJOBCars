@@ -10,7 +10,8 @@ async function detailCars(car_code, page) {
   try {
     await page.setViewport({ width: 1920, height: 1080 });
     await page.goto(`${url}/BuyCar/BuyCarView.do?sCarProductCode=${car_code}`, {
-      waitUntil: "domcontentloaded",
+      timeout: 1000000,
+      waitUntil: "load",
     });
 
     const listImage = await page.evaluate(() => {
@@ -99,19 +100,19 @@ async function detailCars(car_code, page) {
       return carModelEl || "";
     });
 
-
     // Lấy hiệu suất xe
     let performance_check = await page.evaluate(() => {
       const el_popup = document.getElementById("BuyCarPopup_Inspect");
       const el_frame = el_popup.getElementsByTagName("iframe")[0];
       let src = el_frame.getAttribute("src");
+
       return src;
     });
 
     await page.close();
     return {
       car_code,
-      performance_check,
+      performance_check: performance_check || 'Exception rồi bé ơi <3',
       // car_model,
       // listImage,
       // car_name,
