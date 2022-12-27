@@ -1,17 +1,32 @@
 require("dotenv").config();
 const fs = require("fs");
 const { startBrowser } = require("../browser");
+const axios = require("axios");
 
 function sleep(seconds) {
   return new Promise((resolve, reject) => setTimeout(resolve, seconds));
+}
+
+const BASE_URL = process.env.BASE_URL;
+
+async function saveData(data) {
+  try {
+    const response = await axios.post(`${BASE_URL}/api/cars/save-dautomall`, {
+      data: data,
+    });
+    console.log(response.data.message);
+    return response.data;
+  } catch (error) {
+    console.log("error to save data", error);
+  }
 }
 
 async function detailCars(car_code, page) {
   try {
     await page.setViewport({ width: 1920, height: 1080 });
     await page.goto(`${url}/BuyCar/BuyCarView.do?sCarProductCode=${car_code}`, {
-      timeout: 1000000,
       waitUntil: "load",
+      timeout: 1000000,
     });
 
     const listImage = await page.evaluate(() => {
@@ -19,14 +34,16 @@ async function detailCars(car_code, page) {
       const ellistImage = document.querySelectorAll(".slide.slick-slide");
       ellistImage.forEach((elImage) => {
         let src = elImage.getAttribute("style").trim();
-        src = src.replace("background-image: url(", "");
-        src = src.replace(`)`, "");
-        src = src.replace(`'`, "");
-        src = src.split(";")[0];
-        src = src.replace(`'`, "");
+        src = src?.replace("background-image: url(", "");
+        src = src?.replace(`)`, "");
+        src = src?.replace(`'`, "");
+        src = src?.split(";")[0];
+        src = src?.replace(`'`, "");
+        src = src?.replace(`"`, "");
+        src = src?.replace(`"`, "");
         lists.push(src);
       });
-      return lists;
+      return lists || [];
     });
     const car_name = await page.evaluate(() => {
       let name = document.querySelector(".infoWp .secTop h3").innerText;
@@ -112,13 +129,13 @@ async function detailCars(car_code, page) {
     await page.close();
     return {
       car_code,
-      performance_check: performance_check || 'Exception rồi bé ơi <3',
-      // car_model,
-      // listImage,
-      // car_name,
-      // price,
-      // basic_infr,
-      // convenience_infr,
+      performance_check: performance_check || '',
+      car_model,
+      listImage,
+      car_name,
+      price,
+      basic_infr,
+      convenience_infr,
     };
   } catch (error) {
     console.log("Lỗi ", error);
@@ -128,8 +145,6 @@ async function detailCars(car_code, page) {
 const url = "https://dautomall.com";
 
 async function scrapDautomall() {
-  console.time("CRAWL DATA");
-
   const browser = await startBrowser();
   try {
     let page = await browser.newPage();
@@ -235,7 +250,7 @@ async function scrapDautomall() {
         const car = carList[i];
         let pageDetail = await browser.newPage();
         const detail = await detailCars(car, pageDetail);
-        console.log("DETAIL: ", detail);
+        await saveData(detail);
       }
 
       dataFile = [...dataFile, ...carList];
@@ -281,7 +296,6 @@ async function scrapDautomall() {
 
     await page.close();
     await browser.close();
-    console.timeEnd("CRAWL DATA");
   } catch (error) {
     console.log("Lỗi ", error);
   }
