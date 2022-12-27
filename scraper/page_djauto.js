@@ -6,7 +6,6 @@ const scraperObject = {
   countCho: 1,
   async scraper(browser, count) {
     try {
-      console.time("djauto");
       let dataFile = [];
       let pageTemp = await browser.newPage();
       console.log(`Navigating to  ${this.url}...`);
@@ -302,7 +301,6 @@ const scraperObject = {
 
       await pageTemp.close();
       await browser.close();
-      console.timeEnd("djauto");
     } catch (error) {
       console.log("Navigate to page error: ", this.count);
       this.scraper(browser, this.count);
