@@ -99,22 +99,19 @@ async function detailCars(car_code, page) {
       return carModelEl || "";
     });
 
-    await page.addStyleTag({
-      content: `#BuyCarPopup_Inspect { display: none !important; }`,
+
+    // Lấy hiệu suất xe
+    let performance_check = await page.evaluate(() => {
+      const el_popup = document.getElementById("BuyCarPopup_Inspect");
+      const el_frame = el_popup.getElementsByTagName("iframe")[0];
+      let src = el_frame.getAttribute("src");
+      return src;
     });
 
-    const frame = await page.$("#checkReport_wp_iframe");
-    const frameContent = await frame.contentFrame();
-  
-
-    const performance_check_link = await frameContent.evaluate(() => {
-      let link = document.querySelector(".btn_checkReportMore").getAttribute("onclick");
-      return link;
-    });
     await page.close();
     return {
       car_code,
-      frameContent,
+      performance_check,
       // car_model,
       // listImage,
       // car_name,

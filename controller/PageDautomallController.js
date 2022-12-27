@@ -162,14 +162,19 @@ async function PageDetail(browser, link) {
 
     await page.waitForSelector(".sellcarBox");
 
-    const car_name = await page.evaluate(() => {
-      let name = document.querySelector(".infoWp .secTop h3").innerText;
-      return name;
+    await page.waitForSelector(".basic_infr");
+
+    let carFound = await page.evaluate(() => {
+      let car_name = document.querySelector(".infoWp .secTop h3").innerText;
+      let year_manufacture = document.querySelector(".basic_infr .tb02 ")
+      return {
+
+      }
     });
     fs.writeFileSync("dautomallName.json", JSON.stringify(car_name));
 
     await page.close();
-    return Promise.resolve(car_name);
+    return Promise.resolve(carFound);
   } catch (error) {
     return Promise.reject(error);
   }
