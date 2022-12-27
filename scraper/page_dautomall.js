@@ -174,13 +174,13 @@ async function scrapDautomall() {
     await frame.waitForSelector(".form1 .secMdle");
     await frame.waitForSelector(".form1 .secMdle .pagination");
 
-    // const totalPage = await frame.evaluate(() => {
-    //   const lastPage = document
-    //     .querySelector(".pagination .NextNext")
-    //     .getAttribute("onclick");
-    //   return lastPage.match(/\d+/)[0];
-    // });
-    const totalPage = 2;
+    const totalPage = await frame.evaluate(() => {
+      const lastPage = document
+        .querySelector(".pagination .NextNext")
+        .getAttribute("onclick");
+      return lastPage.match(/\d+/)[0];
+    });
+    // const totalPage = 2;
 
     await sleep(1000);
     console.log(
