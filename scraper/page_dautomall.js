@@ -20,7 +20,7 @@ async function saveData(data) {
   } catch (error) {
     await sendEmail({
       subject: "Lỗi Lưu Xe",
-      html: `Lỗi Lưu Xe - ${error?.data}`,
+      html: `Lỗi Lưu Xe - ${error}`,
       email: "vuducviet0131@gmail.com, thangld2407@gmail.com"
     })
     console.log("error to save data", error);
