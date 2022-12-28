@@ -2,6 +2,7 @@ require("dotenv").config();
 const fs = require("fs");
 const { startBrowser } = require("../browser");
 const axios = require("axios");
+const sendEmail = require("../helper/sendEmail");
 
 function sleep(seconds) {
   return new Promise((resolve, reject) => setTimeout(resolve, seconds));
@@ -17,6 +18,11 @@ async function saveData(data) {
     console.log(response.data.message);
     return response.data;
   } catch (error) {
+    await sendEmail({
+      subject: "Lỗi Lưu Xe",
+      html: `Lỗi Lưu Xe - ${error?.data}`,
+      email: "vuducviet0131@gmail.com, thangld2407@gmail.com"
+    })
     console.log("error to save data", error);
   }
 }
@@ -138,6 +144,11 @@ async function detailCars(car_code, page) {
       convenience_infr,
     };
   } catch (error) {
+    await sendEmail({
+      subject: "Lỗi detailCars",
+      html: `Lỗi detailCars - ${error}`,
+      email: "vuducviet0131@gmail.com, thangld2407@gmail.com"
+    })
     console.log("Lỗi ", error);
   }
 }
@@ -297,6 +308,11 @@ async function scrapDautomall() {
     await page.close();
     await browser.close();
   } catch (error) {
+    await sendEmail({
+      subject: "Lỗi detailCars",
+      html: `Lỗi detailCars - ${error}`,
+      email: "vuducviet0131@gmail.com, thangld2407@gmail.com"
+    })
     console.log("Lỗi ", error);
   }
 }
