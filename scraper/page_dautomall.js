@@ -37,7 +37,7 @@ async function detailCars(car_code, page) {
 
     const listImage = await page.evaluate(() => {
       let lists = [];
-      const ellistImage = document.querySelectorAll(".slide.slick-slide");
+      const ellistImage = document.querySelectorAll(".slide.slick-slide.slick-cloned");
       ellistImage.forEach((elImage) => {
         let src = elImage.getAttribute("style").trim();
         src = src?.replace("background-image: url(", "");
