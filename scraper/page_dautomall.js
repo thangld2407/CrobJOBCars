@@ -135,6 +135,19 @@ async function detailCars(car_code, page) {
       return src;
     });
 
+    let primary_image = await page.evaluate(() => {
+      const elImage = document.querySelector(".slick-track .slide.slick-slide.slick-current.slick-active");
+        let src = elImage?.getAttribute("style").trim();
+        src = src?.replace("background-image: url(", "");
+        src = src?.replace(`)`, "");
+        src = src?.replace(`'`, "");
+        src = src?.split(";")[0];
+        src = src?.replace(`'`, "");
+        src = src?.replace(`"`, "");
+        src = src?.replace(`"`, "");
+        return src || '';
+    });
+
     await page.close();
     return {
       car_code,
@@ -145,6 +158,7 @@ async function detailCars(car_code, page) {
       price,
       basic_infr,
       convenience_infr,
+      primary_image
     };
   } catch (error) {
     await sendEmail({
