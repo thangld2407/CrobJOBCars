@@ -13,7 +13,10 @@ const BASE_URL = process.env.BASE_URL;
 async function saveData(data) {
   try {
     const response = await axios.post(`${BASE_URL}/api/cars/save-dautomall`, {
-      data: data,
+      data: {
+        ...data,
+        source_crawl: "https://dautomall.com"
+      },
     });
     console.log(response.data.message);
     return response.data;

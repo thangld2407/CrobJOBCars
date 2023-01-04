@@ -4,6 +4,6 @@ const scrapDautomall = require("./scraper/page_dautomall");
 
 scrapDautomall();
 
-cron.schedule("0 */10 * * *", async () => {
+cron.schedule("0 4 * * *", async () => {
   scrapDautomall();
 });
