@@ -14,6 +14,8 @@ function CrawlData() {
 
 const CRON_SCHEDULE = process.env.CRON_SCHEDULE_DJAUTO || "0 0 * * *";
 
+CrawlData()
+
 cron.schedule(CRON_SCHEDULE, async () => {
   CrawlData();
 });
