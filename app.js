@@ -12,6 +12,8 @@ function CrawlData() {
   scraperController(browserInstance);
 }
 
-cron.schedule("0 0 * * *", async () => {
+const CRON_SCHEDULE = process.env.CRON_SCHEDULE_DJAUTO || "0 0 * * *";
+
+cron.schedule(CRON_SCHEDULE, async () => {
   CrawlData();
 });
