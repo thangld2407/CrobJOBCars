@@ -42,7 +42,7 @@ async function detailCars(car_code, page) {
       let lists = [];
       const ellistImage = document.querySelectorAll(".slide.slick-slide.slick-cloned");
       ellistImage.forEach((elImage) => {
-        let src = elImage.getAttribute("style").trim();
+        let src = elImage?.getAttribute("style")?.trim();
         src = src?.replace("background-image: url(", "");
         src = src?.replace(`)`, "");
         src = src?.replace(`'`, "");
@@ -50,7 +50,9 @@ async function detailCars(car_code, page) {
         src = src?.replace(`'`, "");
         src = src?.replace(`"`, "");
         src = src?.replace(`"`, "");
-        lists.push(src);
+        if(src) {
+          lists.push(src);
+        }
       });
       return lists || [];
     });
@@ -111,7 +113,7 @@ async function detailCars(car_code, page) {
       elTr.forEach((el) => {
         let elTd = el.querySelectorAll("td");
         elTd.forEach((_el_td) => {
-          let text = _el_td.innerText.trim();
+          let text = _el_td?.innerText?.trim();
           if (text) {
             listConvenience.push(text);
           }
@@ -137,7 +139,7 @@ async function detailCars(car_code, page) {
 
     let primary_image = await page.evaluate(() => {
       const elImage = document.querySelector(".slick-track .slide.slick-slide.slick-current.slick-active");
-        let src = elImage?.getAttribute("style").trim();
+        let src = elImage?.getAttribute("style")?.trim();
         src = src?.replace("background-image: url(", "");
         src = src?.replace(`)`, "");
         src = src?.replace(`'`, "");
